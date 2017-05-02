@@ -1,0 +1,9 @@
+.idea/
+build/
+example/
+node_modules/
+test/
+.gitignore
+.npmignore
+.jshintrc
+

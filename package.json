@@ -1,0 +1,46 @@
+{
+  "name": "@csllc/cs-modbus-cli",
+  "version": "1.1.2",
+  "description": "Command line utilities based on cs-modbus",
+  "keywords": [
+    "modbus",
+    "master",
+    "tcp",
+    "udp",
+    "rtu",
+    "ascii",
+    "serialport"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/csllc/cs-modbus-cli",
+  "bugs": "https://github.com/csllc/cs-modbus-cli/issues",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/csllc/cs-modbus-cli.git"
+  },
+  "engine": [
+    "node ^6.9.1"
+  ],
+  "main": "index.js",
+  "bin": {
+    "mb": "mb.js"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "@csllc/cs-mb-ble": "^1.0.1",
+    "@csllc/cs-mb-socketcand": "^1.0.0",
+    "@csllc/cs-modbus": "^1.1.3",
+    "chalk": "^1.1.3",
+    "minimist": "^1.2.0",
+    "serialport": "^4.0.7",
+    "socket.io-client": "^1.7.2",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "should": "^11.2.0",
+    "sinon": "^1.17.7"
+  }
+}

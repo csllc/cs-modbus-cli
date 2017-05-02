@@ -1,0 +1,32 @@
+{
+    "port": {
+        "name": "34:81:f4:15:b3:d5",
+        "options": {
+            "baudrate": 57600
+        }
+    },
+    "websocket": {
+        "url": "http://127.0.0.1:8080",
+        "reconnection": true,
+        "reconnectionAttempts": 3,
+        "reconnectionDelay": 1000,
+        "reconnectionDelayMax": 5000,
+        "timeout": 5000
+    },
+    "master": {
+        "transport": {
+            "type": "tunnel",
+            "eofTimeout": 40,
+            "connection": {
+                "type": "serial",
+                "socket": "Replace with an instance of io()"
+            }
+        },
+        "suppressTransactionErrors": true,
+        "retryOnException": false,
+        "maxConcurrentRequests": 2,
+        "defaultUnit": 16,
+        "defaultMaxRetries": 0,
+        "defaultTimeout": 2000
+    }
+}
