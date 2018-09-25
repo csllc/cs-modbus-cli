@@ -1,8 +1,8 @@
 {
     "port": {
-        "name": "34:81:f4:15:b3:d5",
+        "name": "/dev/cu.usbserial-FTYXQCAR",
         "options": {
-            "baudrate": 57600
+            "baudrate": 115200
         }
     },
     "websocket": {
@@ -15,7 +15,7 @@
     },
     "master": {
         "transport": {
-            "type": "tunnel",
+            "type": "rtu",
             "eofTimeout": 40,
             "connection": {
                 "type": "serial",
@@ -25,7 +25,7 @@
         "suppressTransactionErrors": true,
         "retryOnException": false,
         "maxConcurrentRequests": 2,
-        "defaultUnit": 16,
+        "defaultUnit": 1,
         "defaultMaxRetries": 0,
         "defaultTimeout": 2000
     }

@@ -11,7 +11,7 @@
 'use strict';
 
 // the json file where our default configuration is located
-var CONFIG_FILE = './config.json';
+var CONFIG_FILE = __dirname + '/config.json';
 
 // get application path
 var path = require('path');
@@ -54,7 +54,7 @@ config.master.defaultUnit = args.slave ||
   process.env.MODBUS_SLAVE ||
   config.master.defaultUnit;
 
-// override slave id if necessary
+// override baud if necessary
 config.port.options.baudrate = args.baudrate ||
   process.env.MODBUS_BAUDRATE ||
   config.port.options.baudrate;
@@ -86,7 +86,7 @@ if( args.save ) {
 // overriding config.json properties as needed
 var macRE = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/i;
 
-if( config.port.name && macRE.test( config.port.name )) {
+if( !args.l && config.port.name && macRE.test( config.port.name )) {
   config.master.transport.type = 'ip';
   config.master.transport.connection.type = 'ble';
 }
