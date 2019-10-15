@@ -14,7 +14,7 @@ var CONFIG_DEFAULTS = {
     "port": {
         "name": "use_--port_to_select_port",
         "options": {
-            "baudrate": 115200
+            "baudRate": 115200
         }
     },
     "websocket": {
@@ -108,9 +108,9 @@ config.master.defaultUnit = args.slave ||
   config.master.defaultUnit;
 
 // override baud if necessary
-config.port.options.baudrate = args.baudrate || args.baud ||
+config.port.options.baudRate = args.baudrate || args.baud || args.baudRate ||
   process.env.MODBUS_BAUDRATE ||
-  config.port.options.baudrate;
+  config.port.options.baudRate;
 
 
 // override transport if necessary
