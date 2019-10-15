@@ -10,8 +10,48 @@
  */
 'use strict';
 
-// the json file where our default configuration is located
-var CONFIG_FILE = __dirname + '/config.json';
+var CONFIG_DEFAULTS = {
+    "port": {
+        "name": "use_--port_to_select_port",
+        "options": {
+            "baudrate": 115200
+        }
+    },
+    "websocket": {
+        "url": "http://127.0.0.1:8080",
+        "reconnection": true,
+        "reconnectionAttempts": 3,
+        "reconnectionDelay": 1000,
+        "reconnectionDelayMax": 5000,
+        "timeout": 5000
+    },
+    "master": {
+        "transport": {
+            "type": "rtu",
+            "eofTimeout": 40,
+            "connection": {
+                "type": "serial",
+                "socket": "Replace with an instance of io()"
+            }
+        },
+        "suppressTransactionErrors": true,
+        "retryOnException": false,
+        "maxConcurrentRequests": 2,
+        "defaultUnit": 1,
+        "defaultMaxRetries": 0,
+        "defaultTimeout": 2000
+    }
+};
+
+// get the config folder location - depends on Operating System
+// darwin = MAC
+// Windows: HOMEPATH environment variable
+// Linux (Debian): HOME environment variable
+let CONFIG_FOLDER = (process.env.APPDATA) || 
+  (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOMEPATH || process.env.HOME );
+
+let CONFIG_FILE = CONFIG_FOLDER + '/.cs-mb-cli.json';
+
 
 // get application path
 var path = require('path');
@@ -25,8 +65,21 @@ var chalk = require('chalk');
 // command-line options will be available in the args variable
 var args = require('minimist')(process.argv.slice(2));
 
-// Configuration defaults
-var config = require( CONFIG_FILE );
+var config;
+
+// read config file unless forced to use defaults, or can't read config file
+if( args.default )
+{
+  config = CONFIG_DEFAULTS;
+}
+else {
+  try {
+    config = require( CONFIG_FILE );
+  }
+  catch( e ) {
+    config = CONFIG_DEFAULTS;
+  }
+}
 
 // Keep track of mode for output purposes (boolean)
 var isAscii = (config.master.transport.type === 'ascii');
@@ -55,7 +108,7 @@ config.master.defaultUnit = args.slave ||
   config.master.defaultUnit;
 
 // override baud if necessary
-config.port.options.baudrate = args.baudrate ||
+config.port.options.baudrate = args.baudrate || args.baud ||
   process.env.MODBUS_BAUDRATE ||
   config.port.options.baudrate;
 
@@ -77,7 +130,7 @@ config.master.transport.connection.type = args.connection ||
 if( args.save ) {
   var fs = require('fs');
 
-  console.info( chalk.green('Writing configuration file\r'));
+  console.info( chalk.green('Writing configuration file: \r' + CONFIG_FILE + '\r'));
   fs.writeFileSync( CONFIG_FILE, JSON.stringify(config, null, 4));
 
 }
@@ -281,11 +334,14 @@ if( args.h  ) {
   console.info( '    -h          This help output\r');
   console.info( '    -l          List all ports on the system\r');
   console.info( '    -v          Verbose output (for debugging)\r');
-  console.info( '    --save      Write configuration to defaults\r');
+  console.info( '    --save      Save configuration for future\r');
+  console.info( '    --show      Show configuration\r');
+  console.info( '    --default   Use default configuration rather than saved\r');  
   console.info( '    --loop      Repeat command until CTRL-C\r'); 
   console.info( '    --log       Write info to specified logfile\r');
   console.info( '    --out       Output type (eg csv)\r');  
   console.info( '    --port      Specify serial port to use\r');
+  console.info( '    --baud      Specify serial baud rate\r');
   console.info( '    --slave     ' +
     'Specify MODBUS slave ID to communicate with\r');
   console.info( '    --transport ' +
@@ -519,6 +575,9 @@ if( args.l ) {
     });
   }
 
+}
+else if( args.show ) {
+  console.log( util.inspect( config ));
 }
 else {
 

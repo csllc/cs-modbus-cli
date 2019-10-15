@@ -29,7 +29,6 @@
     "test": "mocha"
   },
   "dependencies": {
-    "@csllc/cs-mb-ble": "^1.0.1",
     "@csllc/cs-mb-socketcand": "^1.0.0",
     "@csllc/cs-modbus": "^2.0.0",
     "chalk": "^1.1.3",
