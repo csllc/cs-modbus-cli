@@ -25,6 +25,16 @@ var CONFIG_DEFAULTS = {
         "reconnectionDelayMax": 5000,
         "timeout": 5000
     },
+    "can":{
+      "rate" : 250000,
+      "myid" : 254
+    },
+    "canUsbComm" : {
+      "baudRate": 480800,
+      "j1939": {
+        "preferredAddress": 254,
+      }
+    },
     "master": {
         "transport": {
             "type": "rtu",
@@ -122,6 +132,16 @@ config.master.transport.type = args.transport ||
 config.master.transport.connection.type = args.connection ||
   process.env.MODBUS_CONNECTION ||
   config.master.transport.connection.type;
+
+// override CANBUS rate if necessary
+config.can.rate = args.canrate ||
+  process.env.MODBUS_CANRATE ||
+  config.can.rate;
+
+// override canbus ID if necessary
+config.can.myid = args.canid ||
+  process.env.MODBUS_CANID ||
+  config.can.myid;
 
 
 // if the user included the --save option, write the 
@@ -342,12 +362,14 @@ if( args.h  ) {
   console.info( '    --out       Output type (eg csv)\r');  
   console.info( '    --port      Specify serial port to use\r');
   console.info( '    --baud      Specify serial baud rate\r');
+  console.info( '    --canrate   Specify CANBUS baud rate');
+  console.info( '    --canid     Specify (my) CANBUS node ID');
   console.info( '    --slave     ' +
     'Specify MODBUS slave ID to communicate with\r');
   console.info( '    --transport ' +
-    'Specify type of transport to use (ascii/rtu/tunnel/ip/socketcand\r');
+    'Specify type of transport to use (ascii/rtu/tunnel/ip/socketcand/j1939\r');
   console.info( '    --connection ' +
-    'Specify type of connection to use (serial/tcp/udp/generic\r');
+    'Specify type of connection to use (serial/tcp/udp/generic/can-usb-com\r');
 
   console.info( chalk.underline( '\rResult\r'));
   console.info( 'Return value is 0 if successful\r');
@@ -760,6 +782,37 @@ else {
     });
 
   }
+  else if( config.master.transport.connection.type === 'can-usb-com') {
+
+    let CanUsbComm = require('can-usb-com');
+
+    config.canUsbComm.canRate = config.can.rate;
+    config.canUsbComm.j1939.preferredAddress = config.can.myid;
+
+    port = new CanUsbComm(config.canUsbComm);
+
+    // Make serial port instance available for the modbus master
+    config.master.transport.connection.type = 'generic';
+    config.master.transport.connection.device = port;
+ 
+     createMaster();
+
+    // Open the port
+    // the 'open' event is triggered when complete
+    if( args.v ) {
+      serialLog.info( 'Opening ' + config.port.name );
+    }
+
+   // Open the com port and configure...
+    port.open( config.port.name )
+
+    .catch( function(err) {
+      console.log(err);
+      exit(1);
+    });
+
+  }
+
 }
 
 function createMaster( ) {

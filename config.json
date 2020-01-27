@@ -13,10 +13,20 @@
         "reconnectionDelayMax": 5000,
         "timeout": 5000
     },
+    "can":{
+      "rate" : 250000,
+      "myid" : 254
+    },
+    "canUsbComm" : {
+      "baudRate": 480800,
+      "j1939": {
+        "preferredAddress": 254
+      }
+    },
     "master": {
         "transport": {
             "type": "rtu",
-            "eofTimeout": 40,
+            "eofTimeout": 100,
             "connection": {
                 "type": "serial",
                 "socket": "Replace with an instance of io()"
