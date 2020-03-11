@@ -623,14 +623,34 @@ else {
   var serialLog = winston.loggers.get('serial');
   serialLog.remove(winston.transports.Console);
   if( args.v && !args.out ){
-    serialLog.add(winston.transports.Console, {
+    serialLog.add(new winston.transports.Console((function(opts) {
+          const newOpts = {};
+          const formatArray = [];
+          const formatOptions = {
+            stringify: () => winston.format((info) => { info.message = JSON.stringify(info.message); })(),
+            formatter: () => winston.format((info) => { info.message = opts.formatter(Object.assign(info, opts)); })(),
+            json: () => winston.format.json(),
+            raw: () => winston.format.json(),
+            label: () => winston.format.label(opts.label),
+            logstash: () => winston.format.logstash(),
+            prettyPrint: () => winston.format.prettyPrint({depth: opts.depth || 2}),
+            colorize: () => winston.format.colorize({level: opts.colorize === true || opts.colorize === 'level', all: opts.colorize === 'all', message: opts.colorize === 'message'}),
+            timestamp: () => winston.format.timestamp(),
+            align: () => winston.format.align(),
+            showLevel: () => winston.format((info) => { info.message = info.level + ': ' + info.message; })()
+          }
+          Object.keys(opts).filter(k => !formatOptions.hasOwnProperty(k)).forEach((k) => { newOpts[k] = opts[k]; });
+          Object.keys(opts).filter(k => formatOptions.hasOwnProperty(k) && formatOptions[k]).forEach(k => formatArray.push(formatOptions[k]()));
+          newOpts.format = winston.format.combine(...formatArray);
+          return newOpts;
+        })({
         level: 'silly',
         colorize: true,
         label: 'serial'
-    });
+    })));
   }
   if( args.log > '' ){
-    serialLog.add(winston.transports.File, { filename: args.log });
+    serialLog.add(new winston.transports.File({ filename: args.log }));
   }
 
 
@@ -656,7 +676,7 @@ else {
 
   // Log to output file if --log option is used
   if( args.log > '' ){
-    transLog.add(winston.transports.File, { filename: args.log });
+    transLog.add(new winston.transports.File({ filename: args.log }));
   }
 
   var port;
