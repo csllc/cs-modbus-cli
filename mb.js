@@ -114,6 +114,7 @@ config.port.name = args.port || process.env.MODBUS_PORT || config.port.name;
 
 // override slave id if necessary
 config.master.defaultUnit = args.slave ||
+  args.unit ||
   process.env.MODBUS_SLAVE ||
   config.master.defaultUnit;
 
@@ -249,6 +250,18 @@ function parseNumber( s, def )
   return number;
 
 }
+
+// parse string to integer, either 0xhh or ddd format
+function parseValue( str ) {
+
+  if( str.toString().substring(0,1) === '0x') {
+    return parseInt( str.substring(2), 16);
+  }
+  else {
+    return parseInt( str );
+  }
+}
+
 /**
  * Convert an array of args to an array of numbers
  *
@@ -265,21 +278,31 @@ function argsToByteBuf( args, start )
   for( var i = start; i< args.length; i++ ) {
     var number;
 
-    if( args[i].toString().substring(0,1) === '0x') {
-      number = parseInt(args[i].substring(2), 16);
+    if( args[i].toString().indexOf(':') > -1 ) {
+      // a repeated value
+      var tokens = args[i].split(':');
+
+      var value = parseValue( tokens[0] );
+      var count = parseValue( tokens[1] );
+
+      if( value >=0 && value <= 255 && count > 0 && count < 65536 ) {
+        var arr = new Array(count).fill( value );
+
+        values = values.concat( arr );
+      }
     }
     else {
-      number = parseInt(args[i]);
+      number = parseValue(args[i]);
+      if( number < 0 || number > 255 ) {
+        console.error( chalk.red('Invalid data value: ' + args[i] ));
+          exit(1);
+      }
+      values.push(number);
     }
 
-    if( number < 0 || number > 255 ) {
-      console.error( chalk.red('Invalid data value: ' + args[i] ));
-        exit(1);
-    }
-    values.push(number);
   }
 
-  return new Buffer(values);
+  return Buffer.from(values);
 
 }
 
@@ -335,7 +358,7 @@ if( args.h  ) {
   console.info( chalk.bold('        fifo') + ' [id] [max]');
   console.info( chalk.bold('        object') + ' [id]');
   console.info( chalk.bold('        memory') +
-    ' [type] [page] [address] [length]');
+    ' [address] [length]');
 
   console.info( '\r    Write types:\r');
   console.info( chalk.bold('        coil') +
@@ -345,7 +368,7 @@ if( args.h  ) {
   console.info( chalk.bold('        fifo') + ' [id] value1 value2...');
   console.info( chalk.bold('        object') + ' [id] value1 value2...');
   console.info( chalk.bold('        memory') +
-    ' [type] [page] [address] value1 value2...');
+    ' [address] value1 value2...');
 
   console.info( '\r    Command types:\r');
   console.info( chalk.bold('        [id]') + ' [value1] [value2] ...' );
