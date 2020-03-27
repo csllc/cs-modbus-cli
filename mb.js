@@ -75,6 +75,8 @@ var chalk = require('chalk');
 // command-line options will be available in the args variable
 var args = require('minimist')(process.argv.slice(2));
 
+let pjson = require('./package.json');
+
 var config;
 
 // read config file unless forced to use defaults, or can't read config file
@@ -341,14 +343,14 @@ function argsToWordBuf( args, start )
 
 
 if( args.h  ) {
-  console.info( '\r--------MODBUS Utility: ' + config.port.name + '----------');
+  console.info( '\r--------MODBUS Utility: ' + pjson.version + '----------');
   console.info( 'Reads or writes from an MODBUS device\r');
   console.info( 'See config.json for connection configuration.\r');
   console.info( '\rCommand format:\r');
   console.info( path.basename(__filename, '.js') +
     '[-h -v] action [type] [...]\r');
   console.info( '    action: read/write/command\r');
-  console.info( '    type: identifies what to read/write/command\r');
+  console.info( '    type: identifies what to read/write/command/generic\r');
   console.info( '\r    Read types:\r');
   console.info( chalk.bold('        coil') + ' [start] [quantity]' );
   console.info( chalk.bold('        discrete') + ' [start] [quantity]');
@@ -372,6 +374,9 @@ if( args.h  ) {
 
   console.info( '\r    Command types:\r');
   console.info( chalk.bold('        [id]') + ' [value1] [value2] ...' );
+
+  console.info( '\r    Generic types (allows any function code to be sent):\r');
+  console.info( chalk.bold('        [function]') + ' [value1] [value2] ...' );
 
   console.info( chalk.underline( '\rOptions\r'));
   console.info( '    -h          This help output\r');
@@ -546,12 +551,25 @@ function doAction () {
       {
         // Validate what we are supposed to set
         if( args.length < 2 ) {
-            console.error( chalk.red('Trying to write unknown item ' + type ));
+            console.error( chalk.red('Must specify command id ' + type ));
             exit(1);
         }
         var buf = argsToByteBuf( args._, 2 );
 
         master.command( args._[1], buf, output );
+        break;
+      }
+
+      case 'generic':
+      {
+        // Validate what we are supposed to set
+        if( args.length < 2 ) {
+            console.error( chalk.red('Must specify function code ' + type ));
+            exit(1);
+        }
+        var buf = argsToByteBuf( args._, 2 );
+
+        master.sendGeneric( args._[1], buf, output );
         break;
       }
 
@@ -596,7 +614,7 @@ if( args.l ) {
 
     });
   }
-  else if( config.master.transport.connection.type === 'serial' ) {
+  else if( config.master.transport.connection.type === 'serial' || config.master.transport.connection.type === 'can-usb-com') {
     // Retrieve a list of all ports detected on the system
     SerialPortFactory.list(function (err, ports) {
 
@@ -629,58 +647,72 @@ else {
   // Check the action argument for validity
   var action = args._[0];
 
-  if( ['read', 'write', 'command'].indexOf( action ) < 0 ) {
+  if( ['read', 'write', 'command', 'generic'].indexOf( action ) < 0 ) {
     console.error(chalk.red( 'Unknown Action ' + action + ' Requested'));
     exit(1);
   }
 
+  let consoleFormat = winston.format.combine(
+    winston.format.colorize(),
+    //winston.format.timestamp(),
+    //winston.format.align(),
+  //  winston.format.simple()
+    winston.format.splat(),
+    winston.format.printf(info => `${info.level}: ${info.message}`)
+  );
 
-  //
-  // Configure the serial port logger
-  // This logs to the console only if the -v option is used and --out option is
-  // not used
+
+  var serialLog = winston.createLogger({
+    level: (args.v && !args.out)? 'silly': 'info',
+    //format: winston.format.json(),
+    defaultMeta: { service: 'serial' },
+    transports: [
+
+      new winston.transports.Console({
+        level: 'info',
+        format: consoleFormat,
+        silent: !(args.v) 
+      }),
+    ]
+  });
+
   // Logs to a file if the --log option is used
-  //
-  winston.loggers.add('serial');
-
-  var serialLog = winston.loggers.get('serial');
-  serialLog.remove(winston.transports.Console);
-  if( args.v && !args.out ){
-    serialLog.add(winston.transports.Console, {
-        level: 'silly',
-        colorize: true,
-        label: 'serial'
-    });
-  }
   if( args.log > '' ){
-    serialLog.add(winston.transports.File, { filename: args.log });
+    serialLog.add(new winston.transports.File({ 
+      filename: args.log,
+      format: winston.format.simple()
+    }));
   }
 
-
+ 
   //
   // Configure the transport logger
   // This logs to the console always
   // Logs to a file if the --log option is used
   //
 
-  winston.loggers.add('transaction',{
-      console: {
-        level: 'silly',
-        colorize: true,
-        label: 'transaction'
-      },
+  var transLog = winston.createLogger({
+    level: 'silly',
+    // format: winston.format.json(),
+    defaultMeta: { service: 'transaction' },
+    transports: [
+
+      new winston.transports.Console({
+        format: consoleFormat,
+
+        silent: (args.out > '') 
+      }),
+    ]
   });
-  var transLog = winston.loggers.get('transaction');
 
-  // Don't log transactions to console if the --out option is used
-  if( args.out > '' ) {
-    transLog.remove(winston.transports.Console);
-  }
-
-  // Log to output file if --log option is used
+  // Logs to a file if the --log option is used
   if( args.log > '' ){
-    transLog.add(winston.transports.File, { filename: args.log });
+    transLog.add(new winston.transports.File({ 
+      filename: args.log,
+      format: winston.format.simple()
+    }));
   }
+
 
   var port;
 
@@ -882,7 +914,7 @@ function createMaster( ) {
       serialLog.info('[TX] ' + data.toString());
     }
     else {
-      serialLog.info('[TX] ', util.inspect( data ) );
+      serialLog.info('[TX] ' + util.inspect( data ) );
     }
   });
 
@@ -891,7 +923,7 @@ function createMaster( ) {
       serialLog.info('[RX] ' + data.toString());
     }
     else {
-      serialLog.info('[RX] ', util.inspect(data ));
+      serialLog.info('[RX] ' + util.inspect(data ));
     }
   });
 
