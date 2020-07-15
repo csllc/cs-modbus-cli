@@ -57,7 +57,7 @@ var CONFIG_DEFAULTS = {
 // darwin = MAC
 // Windows: HOMEPATH environment variable
 // Linux (Debian): HOME environment variable
-let CONFIG_FOLDER = (process.env.APPDATA) || 
+let CONFIG_FOLDER = (process.env.APPDATA) ||
   (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOMEPATH || process.env.HOME );
 
 let CONFIG_FILE = CONFIG_FOLDER + '/.cs-mb-cli.json';
@@ -147,7 +147,7 @@ config.can.myid = args.canid ||
   config.can.myid;
 
 
-// if the user included the --save option, write the 
+// if the user included the --save option, write the
 // actual configuration back to the config.json file to be
 // the defaults for next time
 if( args.save ) {
@@ -169,7 +169,7 @@ if( !args.l && config.port.name && macRE.test( config.port.name )) {
 else {
   // assume it's a serial port.  We could test this but remember serial
   // ports have different name formats depending on operating system
-  
+
   // don't open serial port until we explicitly call the open method
   config.port.options.autoOpen = false;
 
@@ -384,10 +384,10 @@ if( args.h  ) {
   console.info( '    -v          Verbose output (for debugging)\r');
   console.info( '    --save      Save configuration for future\r');
   console.info( '    --show      Show configuration\r');
-  console.info( '    --default   Use default configuration rather than saved\r');  
-  console.info( '    --loop      Repeat command until CTRL-C\r'); 
+  console.info( '    --default   Use default configuration rather than saved\r');
+  console.info( '    --loop      Repeat command until CTRL-C\r');
   console.info( '    --log       Write info to specified logfile\r');
-  console.info( '    --out       Output type (eg csv)\r');  
+  console.info( '    --out       Output type (eg csv)\r');
   console.info( '    --port      Specify serial port to use\r');
   console.info( '    --baud      Specify serial baud rate\r');
   console.info( '    --canrate   Specify CANBUS baud rate');
@@ -478,10 +478,10 @@ function doAction () {
             break;
 
           case 'memory': {
-            
+
             address = parseNumber(args._[2], 0 );
             var length = parseNumber(args._[3],1 );
-            
+
             master.readMemory( address, length, output );
             break;
           }
@@ -525,10 +525,12 @@ function doAction () {
             master.writeFifo8( id, [values], output );
             break;
 
-          //case 'object':
-          //  var id = args._[2] || 0;
-          //  master.writeObject( id, output );
-          //  break;
+          case 'object':
+           var id = args._[2] || 0;
+           values = argsToByteBuf( args._, 3 );
+
+           master.writeObject( id, values, output );
+           break;
 
           case 'memory': {
             address = parseNumber(args._[2], 0 );
@@ -671,20 +673,20 @@ else {
       new winston.transports.Console({
         level: 'info',
         format: consoleFormat,
-        silent: !(args.v) 
+        silent: !(args.v)
       }),
     ]
   });
 
   // Logs to a file if the --log option is used
   if( args.log > '' ){
-    serialLog.add(new winston.transports.File({ 
+    serialLog.add(new winston.transports.File({
       filename: args.log,
       format: winston.format.simple()
     }));
   }
 
- 
+
   //
   // Configure the transport logger
   // This logs to the console always
@@ -700,14 +702,14 @@ else {
       new winston.transports.Console({
         format: consoleFormat,
 
-        silent: (args.out > '') 
+        silent: (args.out > '')
       }),
     ]
   });
 
   // Logs to a file if the --log option is used
   if( args.log > '' ){
-    transLog.add(new winston.transports.File({ 
+    transLog.add(new winston.transports.File({
       filename: args.log,
       format: winston.format.simple()
     }));
@@ -810,7 +812,7 @@ else {
           if( args.v ) {
             device.on( 'connected', function() {serialLog.info( '[connection#connected');} );
             device.on( 'disconnected', function() {serialLog.info( '[connection#disconnected');} );
-            
+
           }
 
           config.master.transport.connection.type = 'generic';
@@ -819,13 +821,13 @@ else {
 
           // now connect to the device and let event handlers take over
           device.connect()
-          
-          .catch( function( err ) { 
+
+          .catch( function( err ) {
             console.log( '[device#error]', err );
           });
 
           createMaster();
-          
+
 
         });
 
@@ -849,7 +851,7 @@ else {
     // Make serial port instance available for the modbus master
     config.master.transport.connection.type = 'generic';
     config.master.transport.connection.device = port;
- 
+
      createMaster();
 
     // Open the port
@@ -883,8 +885,8 @@ function createMaster( ) {
 
     // remember when we started for timing purposes
     startTime = new Date().getTime();
-    
-    doAction(); 
+
+    doAction();
   });
 
   // port errors
