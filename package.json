@@ -31,6 +31,7 @@
   "dependencies": {
     "@csllc/cs-mb-socketcand": "^2.0.1",
     "@csllc/cs-modbus": "^2.5.0",
+    "@csllc/j1939": "^1.0.0",
     "can-usb-com": "^4.0.1",
     "chalk": "^3.0.0",
     "minimist": "^1.2.5",
