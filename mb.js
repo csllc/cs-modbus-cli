@@ -702,6 +702,7 @@ if (args.l) {
 
 
   var port;
+  var device;
 
   if (config.master.transport.connection.type === 'serial') {
 
@@ -824,11 +825,15 @@ if (args.l) {
   } else if (config.master.transport.connection.type === 'can-usb-com') {
 
     let CanUsbComm = require('can-usb-com');
+    let J1939 = require('@csllc/j1939');
 
     config.canUsbComm.canRate = config.can.rate;
     config.canUsbComm.j1939.preferredAddress = config.can.myid;
 
-    port = new CanUsbComm(config.canUsbComm);
+    let canusbcom;
+
+    canusbcom = new CanUsbComm(config.canUsbComm);
+    port = new J1939(canusbcom, config.canUsbComm.j1939);
 
     // Make serial port instance available for the modbus master
     config.master.transport.connection.type = 'generic';
@@ -843,7 +848,7 @@ if (args.l) {
     }
 
     // Open the com port and configure...
-    port.open(config.port.name)
+    canusbcom.open(config.port.name)
 
       .catch(function(err) {
         console.log(err);
@@ -860,7 +865,6 @@ function createMaster() {
 
   // Create the MODBUS master
   master = ModbusPort.createMaster(config.master);
-
 
   // Attach event handler for the port opening
   master.once('connected', function() {
