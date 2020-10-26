@@ -637,6 +637,9 @@ if (args.l) {
         ports.forEach((port) => {
           console.log(port.id);
         });
+        if (args.v) {
+          console.log(ports);
+        }
       });
   }
 
