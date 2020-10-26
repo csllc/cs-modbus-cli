@@ -625,6 +625,17 @@ if (args.l) {
       process.exit(0);
 
     });
+  } else if (config.master.transport.connection.type === 'can') {
+    let CanBus = require('@csllc/cs-canbus-universal');
+
+    let Can = new CanBus();
+    Can.list()
+      .then((ports) => {
+        console.log(ports);
+        ports.forEach((port) => {
+          console.log(port.id);
+        });
+      });
   }
 
 } else if (args.show) {
@@ -823,7 +834,6 @@ if (args.l) {
     });
 
   } else if (config.master.transport.connection.type === 'can-usb-com') {
-
     let CanUsbComm = require('can-usb-com');
     let J1939 = require('@csllc/j1939');
 
@@ -849,14 +859,40 @@ if (args.l) {
 
     // Open the com port and configure...
     canusbcom.open(config.port.name)
-
       .catch(function(err) {
         console.log(err);
         exit(1);
       });
 
-  }
+  } else if (config.master.transport.connection.type === 'can') {
+    let CanBus = require('@csllc/cs-canbus-universal')
+    let J1939 = require('@csllc/j1939');
 
+    config.can.canRate = config.can.rate;
+    config.can.j1939.preferredAddress = config.can.myid;
+
+    let canbus;
+    canbus = new CanBus(config.can);
+    port = new J1939(canbus, config.can.j1939);
+
+    // Make the CAN port instance available for the modbus master
+    config.master.transport.connection.type = 'generic';
+    config.master.transport.connection.device = port;
+
+    createMaster();
+
+    // Open the port; the 'open' event is emitted when complete
+    if (args.v) {
+      serialLog.info('Opening ' + config.port.name);
+    }
+
+    // Open the CAN port and configure
+    port.open(config.port.name)
+      .catch((err) => {
+        console.error(err);
+        exit(1);
+      });
+  }
 }
 
 function createMaster() {
