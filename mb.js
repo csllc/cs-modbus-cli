@@ -28,7 +28,10 @@ var CONFIG_DEFAULTS = {
   },
   "can": {
     "rate": 250000,
-    "myid": 254
+    "myid": 254,
+    "j1939": {
+      "preferredAddress": 254,
+    }
   },
   "canUsbComm": {
     "baudRate": 480800,
@@ -631,7 +634,6 @@ if (args.l) {
     let Can = new CanBus();
     Can.list()
       .then((ports) => {
-        console.log(ports);
         ports.forEach((port) => {
           console.log(port.id);
         });
@@ -887,7 +889,7 @@ if (args.l) {
     }
 
     // Open the CAN port and configure
-    port.open(config.port.name)
+    canbus.open(config.port.name)
       .catch((err) => {
         console.error(err);
         exit(1);
