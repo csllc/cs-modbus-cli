@@ -377,16 +377,16 @@ if (args.h) {
   console.info('    --loop      Repeat command until CTRL-C\r');
   console.info('    --log       Write info to specified logfile\r');
   console.info('    --out       Output type (eg csv)\r');
-  console.info('    --port      Specify serial port to use\r');
+  console.info('    --port      Specify serial or CAN port to use\r');
   console.info('    --baud      Specify serial baud rate\r');
   console.info('    --canrate   Specify CANBUS baud rate');
   console.info('    --canid     Specify (my) CANBUS node ID');
   console.info('    --slave     ' +
     'Specify MODBUS slave ID to communicate with\r');
   console.info('    --transport ' +
-    'Specify type of transport to use (ascii/rtu/tunnel/ip/socketcand/j1939\r');
+    'Specify type of transport to use (ascii/rtu/tunnel/ip/socketcand/j1939)\r');
   console.info('    --connection ' +
-    'Specify type of connection to use (serial/tcp/udp/generic/can-usb-com\r');
+    'Specify type of connection to use (serial/tcp/udp/generic/can-usb-com/can)\r');
 
   console.info(chalk.underline('\rResult\r'));
   console.info('Return value is 0 if successful\r');
@@ -394,12 +394,15 @@ if (args.h) {
   console.info('    e.g. ' +
     chalk.dim('mb read object 1 >> myConfig.json') + '\r');
   console.info(chalk.underline('Examples\r'));
+  console.info('mb -l --connection=serial (list all available serial ports)');
+  console.info('mb -l --connection=can (list all available CAN ports)');
   console.info('mb read holding 0 3 (read 3 registers from 0)\r');
   console.info('mb write holding 0 0x100 32 23  ' +
     '(writes register 0, 1, and 2)\r');
   console.info('mb read slave  (retrieve device info)\r');
   console.info('mb read slave --port=COM1 --baud=19200 ' +
-    '--slave=12 --save (save defaults)\r');
+               '--slave=12 --save (save defaults)\r');
+  console.info('mb read memory 0x400 16 --connection=can --port=canlib_0 (Read 16 bytes of memory starting at 0x400 using channel 0 of a Kvaser CAN adapter)');
   console.info('mb read object 3 --loop --out=csv' +
     ' (keep reading object 3 and print in CSV)\r');
   console.info('mb read holding 0x100 2 --loop --out=csv' +
