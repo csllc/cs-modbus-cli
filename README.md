@@ -103,7 +103,7 @@ Read a block of memory from a slave using CAN-USB-COM and save settings
 
 Read a block of memory from a slave using PCAN-USB with handle 81 (0x51) and save settings
 
-`mb read memory --connection=can port=pcanusb_81 --transport=j1939 --canrate=250000 --slave=10 --save`
+`mb read memory --connection=can port=pcan-usb_81 --transport=j1939 --canrate=250000 --slave=10 --save`
 
 Read a block of memory from a slave using channel 0 of a Kvaser CAN adapter and save settings
 
