@@ -29,7 +29,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "@csllc/cs-canbus-universal": "^0.1.0",
+    "@csllc/cs-canbus-universal": "^0.1.1",
     "@csllc/cs-mb-socketcand": "^2.0.1",
     "@csllc/cs-modbus": "^2.5.0",
     "@csllc/j1939": "^1.1.0",

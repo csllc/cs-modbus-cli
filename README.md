@@ -5,6 +5,8 @@ This package provides a command line interface to @csllc/cs-modbus to implement 
 To install the package globally, use 
 `npm install -g @csllc/cs-modbus-cli`.
 
+To upgrade this package, assuming it was installed using the above command, use `npm upgrade -g @csllc/cs-modbus-cli`.
+
 The `mb ...` command will then be available on your path. 
 
 For development purposes, clone or download the repository, and use
