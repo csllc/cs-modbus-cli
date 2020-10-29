@@ -1,6 +1,8 @@
 # cs-modbus-cli
 
-This package provides a command line interface to @csllc/cs-modbus to implement a MODBUS master.
+This package provides a command line interface to @csllc/cs-modbus to implement a MODBUS master. 
+
+NodeJS version 10.22.1 or newer is required to use the `mb` utility. It has been tested using 10.22.1 and 12.8.3 on Windows and macOS. It may also work with older version of Node, but without support for native CAN adapter addons (PCAN, Kvaser).
 
 To install the package globally, use 
 `npm install -g @csllc/cs-modbus-cli`.
