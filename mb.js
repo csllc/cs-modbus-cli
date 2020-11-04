@@ -88,7 +88,7 @@ if (args.default) {
   config = CONFIG_DEFAULTS;
 } else {
   try {
-    config = require(CONFIG_FILE);
+    config = Object.assign(require(CONFIG_FILE), CONFIG_DEFAULTS);
   } catch (e) {
     config = CONFIG_DEFAULTS;
   }
