@@ -609,7 +609,7 @@ if (args.l) {
       }
 
     });
-  } else if (config.master.transport.connection.type === 'serial' || config.master.transport.connection.type === 'can-usb-com') {
+  } else if (config.master.transport.connection.type === 'serial') {
     // Retrieve a list of all ports detected on the system
     SerialPortFactory.list(function(err, ports) {
 
@@ -625,6 +625,30 @@ if (args.l) {
           console.log(port.comName +
             ' : ' + port.pnpId + ' : ' + port.manufacturer);
 
+        });
+      }
+
+      process.exit(0);
+
+    });
+  } else if (config.master.transport.connection.type === 'can-usb-com') {
+    // Retrieve a list of likely CAN-USB-COM ports detected on the system
+    SerialPortFactory.list(function(err, ports) {
+
+      if (err) {
+        console.error(err);
+      }
+
+      if (ports) {
+        // ports is now an array of port descriptions.
+        ports.forEach(function(port) {
+
+          if ((port.vendorId === '0403') &&
+              (port.productId === '6001')) {
+            // print each port description
+            console.log(port.comName +
+                        ' : ' + port.pnpId + ' : ' + port.manufacturer);
+          }
         });
       }
 

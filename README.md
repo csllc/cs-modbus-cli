@@ -80,15 +80,19 @@ For CANBUS connections, the bus ID used by the master can be specified using
 
 ### Examples
 
-List all serial ports available on the system
+List all serial ports available on the system, including CAN-USB-COM devices:
 
 `mb -l --connection=serial`
 
-List all available CAN ports available on the system
+List all CAN-USB-COM devices available on the system:
+
+`mb -l --connection=can-usb-com`
+
+List all available CAN ports available on the system, including CAN-USB-COM devices:
 
 `mb -l --connection=can`
 
-Read the ID information from a slave using MODBUS-RTU over serial port
+Read the ID information from a slave using MODBUS-RTU over serial port:
 
 `mb read slave --connection=serial --transport=rtu --baudrate=9600 --slave=10`
 
@@ -101,23 +105,23 @@ Read a block of memory from the slave using stored configuration:
 
 `mb read memory 0x0000 16`
 
-Read a block of memory from a slave using CAN-USB-COM and save settings
+Read a block of memory from a slave using CAN-USB-COM and save settings:
 
 `mb read memory --connection=can-usb-com --transport=j1939 --canrate=250000 --slave=10 --save`
 
-Read a block of memory from a slave using PCAN-USB with handle 81 (0x51) and save settings
+Read a block of memory from a slave using PCAN-USB with handle 81 (0x51) and save settings:
 
-`mb read memory --connection=can port=pcan-usb_81 --transport=j1939 --canrate=250000 --slave=10 --save`
+`mb read memory --connection=can --port=pcan-usb_81 --transport=j1939 --canrate=250000 --slave=10 --save`
 
-Read a block of memory from a slave using channel 0 of a Kvaser CAN adapter and save settings
+Read a block of memory from a slave using channel 0 of a Kvaser CAN adapter and save settings:
 
-`mb read memory --connection=can port=canlib_0 --transport=j1939 --canrate=250000 --slave=10 --save`
+`mb read memory --connection=can --port=canlib_0 --transport=j1939 --canrate=250000 --slave=10 --save`
 
 Read an object from the same device:
 
 `mb read object 1`
 
-Write 2 bytes of memory (note that values prefixed by 0x are interpreted as hex)
+Write 2 bytes of memory (note that values prefixed by 0x are interpreted as hex):
 
 `mb write memory 0x400 0x55 0xAA`
 
