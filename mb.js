@@ -421,8 +421,10 @@ function doAction() {
   var max;
   var values;
 
-  // Now do the action that was requested
-  switch (action) {
+  try {
+
+    // Now do the action that was requested
+    switch (action) {
 
     case 'read':
       // Validate what we are supposed to get
@@ -430,59 +432,59 @@ function doAction() {
 
       switch (type) {
 
-        case 'coil':
-          address = args._[2] || 0;
-          quantity = args._[3] || 1;
-          master.readCoils(address, quantity, output);
+      case 'coil':
+        address = args._[2] || 0;
+        quantity = args._[3] || 1;
+        master.readCoils(address, quantity, output);
+        break;
+
+      case 'discrete':
+        address = args._[2] || 0;
+        quantity = args._[3] || 1;
+        master.readDiscreteInputs(address, quantity, output);
+        break;
+
+      case 'holding':
+        address = args._[2] || 0;
+        quantity = args._[3] || 1;
+        master.readHoldingRegisters(address, quantity, output);
+        break;
+
+      case 'input':
+        address = args._[2] || 0;
+        quantity = args._[3] || 1;
+        master.readInputRegisters(address, quantity, output);
+        break;
+
+      case 'slave':
+        master.reportSlaveId(output);
+        break;
+
+      case 'fifo':
+        id = args._[2] || 0;
+        max = args._[3] || 250;
+        master.readFifo8(id, max, output);
+        break;
+
+      case 'object':
+        id = args._[2] || 0;
+        master.readObject(id, output);
+        break;
+
+      case 'memory':
+        {
+
+          address = parseNumber(args._[2], 0);
+          var length = parseNumber(args._[3], 1);
+
+          master.readMemory(address, length, output);
           break;
+        }
 
-        case 'discrete':
-          address = args._[2] || 0;
-          quantity = args._[3] || 1;
-          master.readDiscreteInputs(address, quantity, output);
-          break;
-
-        case 'holding':
-          address = args._[2] || 0;
-          quantity = args._[3] || 1;
-          master.readHoldingRegisters(address, quantity, output);
-          break;
-
-        case 'input':
-          address = args._[2] || 0;
-          quantity = args._[3] || 1;
-          master.readInputRegisters(address, quantity, output);
-          break;
-
-        case 'slave':
-          master.reportSlaveId(output);
-          break;
-
-        case 'fifo':
-          id = args._[2] || 0;
-          max = args._[3] || 250;
-          master.readFifo8(id, max, output);
-          break;
-
-        case 'object':
-          id = args._[2] || 0;
-          master.readObject(id, output);
-          break;
-
-        case 'memory':
-          {
-
-            address = parseNumber(args._[2], 0);
-            var length = parseNumber(args._[3], 1);
-
-            master.readMemory(address, length, output);
-            break;
-          }
-
-        default:
-          console.error(chalk.red('Trying to read unknown item ' + type));
-          exit(1);
-          break;
+      default:
+        console.error(chalk.red('Trying to read unknown item ' + type));
+        exit(1);
+        break;
       }
 
       break;
@@ -492,52 +494,52 @@ function doAction() {
       type = args._[1] || 'unknown';
 
       switch (type) {
-        case 'coil':
+      case 'coil':
+        address = args._[2] || 0;
+        values = args._[3] || 1;
+        master.writeSingleCoil(address, values, output);
+        break;
+
+      case 'holding':
+        {
           address = args._[2] || 0;
-          values = args._[3] || 1;
-          master.writeSingleCoil(address, values, output);
-          break;
+          values = argsToWordBuf(args._, 3);
 
-        case 'holding':
-          {
-            address = args._[2] || 0;
-            values = argsToWordBuf(args._, 3);
-
-            if (values.length < 2) {
-              console.error(chalk.red('No values specified '));
-              exit(1);
-            } else {
-              master.writeMultipleRegisters(address, values, output);
-            }
-            break;
+          if (values.length < 2) {
+            console.error(chalk.red('No values specified '));
+            exit(1);
+          } else {
+            master.writeMultipleRegisters(address, values, output);
           }
-
-        case 'fifo':
-          id = args._[2] || 0;
-          values = args._[3] || 0;
-          master.writeFifo8(id, [values], output);
           break;
+        }
 
-        case 'object':
-          var id = args._[2] || 0;
+      case 'fifo':
+        id = args._[2] || 0;
+        values = args._[3] || 0;
+        master.writeFifo8(id, [values], output);
+        break;
+
+      case 'object':
+        var id = args._[2] || 0;
+        values = argsToByteBuf(args._, 3);
+
+        master.writeObject(id, values, output);
+        break;
+
+      case 'memory':
+        {
+          address = parseNumber(args._[2], 0);
           values = argsToByteBuf(args._, 3);
 
-          master.writeObject(id, values, output);
+          master.writeMemory(address, values, output);
           break;
+        }
 
-        case 'memory':
-          {
-            address = parseNumber(args._[2], 0);
-            values = argsToByteBuf(args._, 3);
-
-            master.writeMemory(address, values, output);
-            break;
-          }
-
-        default:
-          console.error(chalk.red('Trying to write unknown item ' + type));
-          exit(1);
-          break;
+      default:
+        console.error(chalk.red('Trying to write unknown item ' + type));
+        exit(1);
+        break;
 
       }
 
@@ -573,6 +575,14 @@ function doAction() {
       console.error(chalk.red('Unknown action: ' + action));
       exit(1);
       break;
+    }
+  } catch(err) {
+    console.error(err);
+    if ((connectionType === 'serial') &&
+        (err.name == 'TypeError [ERR_INVALID_ARG_TYPE]')) {
+      console.error(chalk.red("Did you mean to use '--connection=can-usb-com'?"));
+    }
+    exit(1);
   }
 }
 
@@ -676,6 +686,8 @@ if (args.l) {
 
   // Check the action argument for validity
   var action = args._[0];
+
+  var connectionType = config.master.transport.connection.type;
 
   if (['read', 'write', 'command', 'generic'].indexOf(action) < 0) {
     console.error(chalk.red('Unknown Action ' + action + ' Requested'));
