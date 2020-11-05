@@ -88,7 +88,8 @@ if (args.default) {
   config = CONFIG_DEFAULTS;
 } else {
   try {
-    config = Object.assign(require(CONFIG_FILE), CONFIG_DEFAULTS);
+    let config_file = require(CONFIG_FILE);
+    config = Object.assign({}, CONFIG_DEFAULTS, config_file);
   } catch (e) {
     config = CONFIG_DEFAULTS;
   }
@@ -132,7 +133,7 @@ config.master.transport.type = args.transport ||
   process.env.MODBUS_TRANSPORT ||
   config.master.transport.type;
 
-// override transport if necessary
+// override connection if necessary
 config.master.transport.connection.type = args.connection ||
   process.env.MODBUS_CONNECTION ||
   config.master.transport.connection.type;
