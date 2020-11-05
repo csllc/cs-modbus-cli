@@ -401,7 +401,7 @@ if (args.h) {
     '(writes register 0, 1, and 2)\r');
   console.info('mb read slave  (retrieve device info)\r');
   console.info('mb read slave --port=COM1 --baud=19200 ' +
-               '--slave=12 --save (save defaults)\r');
+    '--slave=12 --save (save defaults)\r');
   console.info('mb read memory 0x400 16 --connection=can --port=canlib_0 (Read 16 bytes of memory starting at 0x400 using channel 0 of a Kvaser CAN adapter)');
   console.info('mb read object 3 --loop --out=csv' +
     ' (keep reading object 3 and print in CSV)\r');
@@ -426,160 +426,160 @@ function doAction() {
     // Now do the action that was requested
     switch (action) {
 
-    case 'read':
-      // Validate what we are supposed to get
-      var type = args._[1] || 'unknown';
+      case 'read':
+        // Validate what we are supposed to get
+        var type = args._[1] || 'unknown';
 
-      switch (type) {
+        switch (type) {
 
-      case 'coil':
-        address = args._[2] || 0;
-        quantity = args._[3] || 1;
-        master.readCoils(address, quantity, output);
-        break;
+          case 'coil':
+            address = args._[2] || 0;
+            quantity = args._[3] || 1;
+            master.readCoils(address, quantity, output);
+            break;
 
-      case 'discrete':
-        address = args._[2] || 0;
-        quantity = args._[3] || 1;
-        master.readDiscreteInputs(address, quantity, output);
-        break;
+          case 'discrete':
+            address = args._[2] || 0;
+            quantity = args._[3] || 1;
+            master.readDiscreteInputs(address, quantity, output);
+            break;
 
-      case 'holding':
-        address = args._[2] || 0;
-        quantity = args._[3] || 1;
-        master.readHoldingRegisters(address, quantity, output);
-        break;
+          case 'holding':
+            address = args._[2] || 0;
+            quantity = args._[3] || 1;
+            master.readHoldingRegisters(address, quantity, output);
+            break;
 
-      case 'input':
-        address = args._[2] || 0;
-        quantity = args._[3] || 1;
-        master.readInputRegisters(address, quantity, output);
-        break;
+          case 'input':
+            address = args._[2] || 0;
+            quantity = args._[3] || 1;
+            master.readInputRegisters(address, quantity, output);
+            break;
 
-      case 'slave':
-        master.reportSlaveId(output);
-        break;
+          case 'slave':
+            master.reportSlaveId(output);
+            break;
 
-      case 'fifo':
-        id = args._[2] || 0;
-        max = args._[3] || 250;
-        master.readFifo8(id, max, output);
-        break;
+          case 'fifo':
+            id = args._[2] || 0;
+            max = args._[3] || 250;
+            master.readFifo8(id, max, output);
+            break;
 
-      case 'object':
-        id = args._[2] || 0;
-        master.readObject(id, output);
-        break;
+          case 'object':
+            id = args._[2] || 0;
+            master.readObject(id, output);
+            break;
 
-      case 'memory':
-        {
+          case 'memory':
+            {
 
-          address = parseNumber(args._[2], 0);
-          var length = parseNumber(args._[3], 1);
+              address = parseNumber(args._[2], 0);
+              var length = parseNumber(args._[3], 1);
 
-          master.readMemory(address, length, output);
-          break;
-        }
+              master.readMemory(address, length, output);
+              break;
+            }
 
-      default:
-        console.error(chalk.red('Trying to read unknown item ' + type));
-        exit(1);
-        break;
-      }
-
-      break;
-
-    case 'write':
-      // Validate what we are supposed to set
-      type = args._[1] || 'unknown';
-
-      switch (type) {
-      case 'coil':
-        address = args._[2] || 0;
-        values = args._[3] || 1;
-        master.writeSingleCoil(address, values, output);
-        break;
-
-      case 'holding':
-        {
-          address = args._[2] || 0;
-          values = argsToWordBuf(args._, 3);
-
-          if (values.length < 2) {
-            console.error(chalk.red('No values specified '));
+          default:
+            console.error(chalk.red('Trying to read unknown item ' + type));
             exit(1);
-          } else {
-            master.writeMultipleRegisters(address, values, output);
+            break;
+        }
+
+        break;
+
+      case 'write':
+        // Validate what we are supposed to set
+        type = args._[1] || 'unknown';
+
+        switch (type) {
+          case 'coil':
+            address = args._[2] || 0;
+            values = args._[3] || 1;
+            master.writeSingleCoil(address, values, output);
+            break;
+
+          case 'holding':
+            {
+              address = args._[2] || 0;
+              values = argsToWordBuf(args._, 3);
+
+              if (values.length < 2) {
+                console.error(chalk.red('No values specified '));
+                exit(1);
+              } else {
+                master.writeMultipleRegisters(address, values, output);
+              }
+              break;
+            }
+
+          case 'fifo':
+            id = args._[2] || 0;
+            values = args._[3] || 0;
+            master.writeFifo8(id, [values], output);
+            break;
+
+          case 'object':
+            var id = args._[2] || 0;
+            values = argsToByteBuf(args._, 3);
+
+            master.writeObject(id, values, output);
+            break;
+
+          case 'memory':
+            {
+              address = parseNumber(args._[2], 0);
+              values = argsToByteBuf(args._, 3);
+
+              master.writeMemory(address, values, output);
+              break;
+            }
+
+          default:
+            console.error(chalk.red('Trying to write unknown item ' + type));
+            exit(1);
+            break;
+
+        }
+
+        break;
+
+      case 'command':
+        {
+          // Validate what we are supposed to set
+          if (args.length < 2) {
+            console.error(chalk.red('Must specify command id ' + type));
+            exit(1);
           }
+          var buf = argsToByteBuf(args._, 2);
+
+          master.command(args._[1], buf, output);
           break;
         }
 
-      case 'fifo':
-        id = args._[2] || 0;
-        values = args._[3] || 0;
-        master.writeFifo8(id, [values], output);
-        break;
-
-      case 'object':
-        var id = args._[2] || 0;
-        values = argsToByteBuf(args._, 3);
-
-        master.writeObject(id, values, output);
-        break;
-
-      case 'memory':
+      case 'generic':
         {
-          address = parseNumber(args._[2], 0);
-          values = argsToByteBuf(args._, 3);
+          // Validate what we are supposed to set
+          if (args.length < 2) {
+            console.error(chalk.red('Must specify function code ' + type));
+            exit(1);
+          }
+          var buf = argsToByteBuf(args._, 2);
 
-          master.writeMemory(address, values, output);
+          master.sendGeneric(args._[1], buf, output);
           break;
         }
 
       default:
-        console.error(chalk.red('Trying to write unknown item ' + type));
+        console.error(chalk.red('Unknown action: ' + action));
         exit(1);
         break;
-
-      }
-
-      break;
-
-    case 'command':
-      {
-        // Validate what we are supposed to set
-        if (args.length < 2) {
-          console.error(chalk.red('Must specify command id ' + type));
-          exit(1);
-        }
-        var buf = argsToByteBuf(args._, 2);
-
-        master.command(args._[1], buf, output);
-        break;
-      }
-
-    case 'generic':
-      {
-        // Validate what we are supposed to set
-        if (args.length < 2) {
-          console.error(chalk.red('Must specify function code ' + type));
-          exit(1);
-        }
-        var buf = argsToByteBuf(args._, 2);
-
-        master.sendGeneric(args._[1], buf, output);
-        break;
-      }
-
-    default:
-      console.error(chalk.red('Unknown action: ' + action));
-      exit(1);
-      break;
     }
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     if ((connectionType === 'serial') &&
-        (err.name == 'TypeError [ERR_INVALID_ARG_TYPE]')) {
+      (err.name == 'TypeError [ERR_INVALID_ARG_TYPE]')) {
       console.error(chalk.red("Did you mean to use '--connection=can-usb-com'?"));
     }
     exit(1);
@@ -654,10 +654,10 @@ if (args.l) {
         ports.forEach(function(port) {
 
           if ((port.vendorId === '0403') &&
-              (port.productId === '6001')) {
+            (port.productId === '6001')) {
             // print each port description
             console.log(port.comName +
-                        ' : ' + port.pnpId + ' : ' + port.manufacturer);
+              ' : ' + port.pnpId + ' : ' + port.manufacturer);
           }
         });
       }
@@ -670,14 +670,14 @@ if (args.l) {
 
     let Can = new CanBus();
     Can.list()
-      .then((ports) => {
-        ports.forEach((port) => {
-          console.log(port.id);
-        });
-        if (args.v) {
-          console.log(ports);
-        }
+    .then((ports) => {
+      ports.forEach((port) => {
+        console.log(port.id);
       });
+      if (args.v) {
+        console.log(ports);
+      }
+    });
   }
 
 } else if (args.show) {
@@ -779,7 +779,7 @@ if (args.l) {
 
     port.open(function(err) {
       if (err) {
-        console.log(err);
+        console.error(chalk.underline.bold(err.message));
         exit(1);
       }
     });
@@ -861,9 +861,9 @@ if (args.l) {
           // now connect to the device and let event handlers take over
           device.connect()
 
-            .catch(function(err) {
-              console.log('[device#error]', err);
-            });
+          .catch(function(err) {
+            console.log('[device#error]', err);
+          });
 
           createMaster();
 
@@ -903,10 +903,11 @@ if (args.l) {
 
     // Open the com port and configure...
     canusbcom.open(config.port.name)
-      .catch(function(err) {
-        console.log(err);
-        exit(1);
-      });
+    .catch(function(err) {
+      console.log("ERROR");
+      console.error(chalk.underline.bold(err.message));
+      exit(1);
+    });
 
   } else if (config.master.transport.connection.type === 'can') {
     let CanBus = require('@csllc/cs-canbus-universal')
@@ -932,10 +933,10 @@ if (args.l) {
 
     // Open the CAN port and configure
     canbus.open(config.port.name)
-      .catch((err) => {
-        console.error(err);
-        exit(1);
-      });
+    .catch((err) => {
+      console.error(chalk.underline.bold(err.message));
+      exit(1);
+    });
   }
 }
 
