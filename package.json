@@ -1,6 +1,6 @@
 {
   "name": "@csllc/cs-modbus-cli",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Command line utilities based on cs-modbus",
   "keywords": [
     "modbus",
@@ -29,7 +29,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "@csllc/cs-canbus-universal": "^0.1.3",
+    "@csllc/cs-canbus-universal": "^0.1.7",
     "@csllc/cs-mb-socketcand": "^2.0.1",
     "@csllc/cs-modbus": "^2.5.0",
     "@csllc/j1939": "^1.1.0",
