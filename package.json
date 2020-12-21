@@ -1,6 +1,6 @@
 {
   "name": "@csllc/cs-modbus-cli",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Command line utilities based on cs-modbus",
   "keywords": [
     "modbus",
