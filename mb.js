@@ -72,6 +72,7 @@ var path = require('path');
 
 // misc utilities
 var util = require('util');
+var deepmerge = require('deepmerge');
 
 // console text formatting
 var chalk = require('chalk');
@@ -89,7 +90,7 @@ if (args.default) {
 } else {
   try {
     let config_file = require(CONFIG_FILE);
-    config = Object.assign({}, CONFIG_DEFAULTS, config_file);
+    config = deepmerge(CONFIG_DEFAULTS, config_file);
   } catch (e) {
     config = CONFIG_DEFAULTS;
   }
