@@ -29,15 +29,15 @@
     "test": "mocha"
   },
   "dependencies": {
-    "@csllc/cs-canbus-universal": "^0.1.8",
+    "@csllc/cs-canbus-universal": "^0.1.14",
     "@csllc/cs-mb-socketcand": "^2.0.1",
-    "@csllc/cs-modbus": "^2.5.0",
+    "@csllc/cs-modbus": "^3.1.0",
     "@csllc/j1939": "^1.1.0",
     "can-usb-com": "^4.0.1",
     "chalk": "^3.0.0",
     "deepmerge": "^4.2.2",
     "minimist": "^1.2.5",
-    "serialport": "^7.1.5",
+    "serialport": "^10.4.0",
     "socket.io-client": "^2.3.0",
     "winston": "^3.2.1"
   },
