@@ -31,9 +31,9 @@
   "dependencies": {
     "@csllc/cs-canbus-universal": "^0.1.16",
     "@csllc/cs-mb-socketcand": "^2.0.1",
-    "@csllc/cs-modbus": "^3.1.0",
-    "@csllc/j1939": "^1.1.0",
-    "can-usb-com": "^4.0.1",
+    "@csllc/cs-modbus": "^3.2.0",
+    "@csllc/j1939": "^1.1.1",
+    "can-usb-com": "^4.0.2",
     "chalk": "^3.0.0",
     "deepmerge": "^4.2.2",
     "minimist": "^1.2.5",
