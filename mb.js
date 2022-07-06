@@ -340,7 +340,7 @@ if (args.h) {
   console.info('\rCommand format:\r');
   console.info(path.basename(__filename, '.js') +
     '[-h -v] action [type] [...]\r');
-  console.info('    action: read/write/command\r');
+  console.info('    action: read/write/writeverify/command\r');
   console.info('    type: identifies what to read/write/command/generic\r');
   console.info('\r    Read types:\r');
   console.info(chalk.bold('        coil') + ' [start] [quantity]');
@@ -360,6 +360,10 @@ if (args.h) {
     ' [start] [quantity] value1 value2...');
   console.info(chalk.bold('        fifo') + ' [id] value1 value2...');
   console.info(chalk.bold('        object') + ' [id] value1 value2...');
+  console.info(chalk.bold('        memory') +
+    ' [address] value1 value2...');
+
+  console.info('\r    WriteVerify types:\r');
   console.info(chalk.bold('        memory') +
     ' [address] value1 value2...');
 
@@ -547,6 +551,29 @@ function doAction() {
 
         break;
 
+      case 'writeverify':
+        // Validate what we are supposed to set
+        type = args._[1] || 'unknown';
+
+        switch (type) {
+        case 'memory':
+          {
+            address = parseNumber(args._[2], 0);
+            values = argsToByteBuf(args._, 3);
+
+            master.writeMemoryVerify(address, values, output);
+            break;
+          }
+
+        default:
+          console.error(chalk.red('Trying to writeverify unknown item ' + type));
+          exit(1);
+          break;
+
+        }
+
+        break;
+
       case 'command':
         {
           // Validate what we are supposed to set
@@ -691,7 +718,7 @@ if (args.l) {
 
   var connectionType = config.master.transport.connection.type;
 
-  if (['read', 'write', 'command', 'generic'].indexOf(action) < 0) {
+  if (['read', 'write', 'writeverify', 'command', 'generic'].indexOf(action) < 0) {
     console.error(chalk.red('Unknown Action ' + action + ' Requested'));
     exit(1);
   }
