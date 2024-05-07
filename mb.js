@@ -602,8 +602,6 @@ if (args.l) {
 
     SerialPort.list()
       .then((ports) => {
-        console.log(ports);
-
         if (ports) {
           // ports is now an array of port descriptions.
           ports.forEach(function (port) {
